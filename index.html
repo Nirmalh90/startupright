@@ -33,11 +33,9 @@
     }
     h1{margin:18px 0 6px;font-size:clamp(24px,5vw,32px);line-height:1.2;color:var(--blue)}
     .subtle{color:var(--green-700);font-size:14px}
-
-    /* CTA buttons */
     .cta{
-      display:block;          /* full row */
-      width:100%;             /* 🔹 full width to fit the box */
+      display:block;
+      width:100%;
       padding:14px 18px;
       border-radius:12px;
       background:var(--blue);
@@ -52,7 +50,6 @@
       color:var(--blue);
       border:1px solid var(--green-200);
     }
-
     .card{
       background:#fff;border:1px solid var(--green-100);border-radius:var(--radius);
       box-shadow:var(--shadow); padding:20px;
@@ -89,6 +86,25 @@
     .err{color:#7f1d1d;background:#fef2f2;border:1px solid #fecaca;padding:12px;border-radius:12px}
     .actions-row{display:flex;gap:10px;align-items:center}
   </style>
+
+  <!-- ✅ Meta Pixel Code -->
+  <script>
+  !function(f,b,e,v,n,t,s)
+  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+  n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];
+  s.parentNode.insertBefore(t,s)}(window, document,'script',
+  'https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '1387978339428786'); 
+  fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=1387978339428786&ev=PageView&noscript=1"
+  /></noscript>
+  <!-- ✅ End Meta Pixel Code -->
+
 </head>
 <body>
   <div class="wrap">
@@ -107,7 +123,7 @@
       <p class="subtle">Fast, no-nonsense evaluation. Submit in minutes. Real insights to de-risk your next steps.</p>
       <div class="space"></div>
 
-      <!-- 🔹 Start + Restart controls -->
+      <!-- Start + Restart controls -->
       <div class="actions-row">
         <button class="cta" id="startBtn">Start the quick evaluation</button>
         <button class="cta secondary" id="restartBtn" style="display:none">Restart questions</button>
@@ -154,11 +170,8 @@
         options: ["Clear pricing & willingness to pay","Likely pricing but untested","Free now, monetize later","Not defined"] },
     ];
 
-    const TOTAL_STEPS = QUESTIONS.length + 2; // Qs + Contact + Confirm
-
-    // Start at -1 so only the hero start button shows initially
+    const TOTAL_STEPS = QUESTIONS.length + 2; 
     let stepIndex = -1;
-
     let answers = JSON.parse(localStorage.getItem("vv_answers") || "{}");
     let contact = JSON.parse(localStorage.getItem("vv_contact") || '{"name":"","email":""}');
     const appCard = document.getElementById("appCard");
@@ -175,17 +188,13 @@
       answers = {};
       contact = { name:"", email:"" };
     }
-
     function setStep(i){
       stepIndex = i;
       toggleTopButtons();
       render();
     }
-
     function allAnswered(){ return QUESTIONS.every(q => !!answers[q.id]); }
-
     function toggleTopButtons(){
-      // 🔹 Hide Start when questions begin; show Restart only when in flow
       const inFlow = stepIndex >= 0;
       startBtn.style.display = inFlow ? "none" : "block";
       restartBtn.style.display = inFlow ? "block" : "none";
@@ -193,13 +202,7 @@
 
     function render(){
       appCard.innerHTML = "";
-
-      if(stepIndex < 0){
-        // Pre-start: show nothing inside the card
-        appCard.innerHTML = "";
-        return;
-      }
-
+      if(stepIndex < 0){ return; }
       const stepNum = stepIndex + 1;
 
       if(stepIndex < QUESTIONS.length){
@@ -218,12 +221,7 @@
       }
       else if(stepIndex === QUESTIONS.length){
         appCard.innerHTML = `
-          <div style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:flex-start">
-            <div style="font-weight:700;color:var(--blue);font-size:18px">Step ${stepNum} of ${TOTAL_STEPS}</div>
-            <div class="stepbar">${Array.from({length:TOTAL_STEPS}).map((_,i)=>`<span class="${i<stepNum?'on':''}"></span>`).join("")}</div>
-          </div>
           <h3>Where can we send your evaluation?</h3>
-          <p class="subtle" style="margin:0 0 12px">We’ll deliver your feedback to this email.</p>
           <label>Your name</label>
           <input id="inName" placeholder="e.g., Nirmal Herath" value="${contact.name||""}">
           <label>Email</label>
@@ -254,10 +252,6 @@
             <span style="color:var(--green-700)">email</span><span style="color:var(--blue);font-weight:600">${contact.email||"—"}</span>
           </div>`;
         appCard.innerHTML=`
-          <div style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:flex-start">
-            <div style="font-weight:700;color:var(--blue);font-size:18px">Step ${stepNum} of ${TOTAL_STEPS}</div>
-            <div class="stepbar">${Array.from({length:TOTAL_STEPS}).map((_,i)=>`<span class="${i<stepNum?'on':''}"></span>`).join("")}</div>
-          </div>
           <h3>Confirm & send your answers</h3>
           <div class="review">${review}</div>
           <form id="vvForm" method="POST" action="${FORMS_ENDPOINT}">
@@ -291,10 +285,11 @@
                 </div>`;
               document.getElementById("againBtn").onclick = ()=>{
                 clearAll();
-                // Return to pre-start state so the big Start button shows again
                 setStep(-1);
                 window.scrollTo({ top: 0, behavior: "smooth" });
               };
+              // 🔹 Track form submission in Meta Pixel
+              if(typeof fbq === "function"){ fbq('track', 'Lead'); }
             }else{
               showError("Submission failed. Please try again.");
             }
@@ -316,17 +311,14 @@
       }
     }
 
-    // Top controls
     startBtn.addEventListener("click", ()=> setStep(0));
     restartBtn.addEventListener("click", ()=>{
       clearAll();
-      setStep(0); // restart into step 1 directly
+      setStep(0);
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
 
     document.getElementById("year").textContent = new Date().getFullYear();
-
-    // Initial state: pre-start (shows big Start button; hides Restart)
     toggleTopButtons();
     render();
   </script>
